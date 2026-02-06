@@ -1,0 +1,38 @@
+.reports-page {
+  padding: 20px;
+}
+
+.severity-high {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.severity-medium {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.severity-low {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.status-open {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.status-in-progress {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+.status-resolved {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.status-closed {
+  background-color: #e5e7eb !important;
+  color: #374151 !important;
+}
