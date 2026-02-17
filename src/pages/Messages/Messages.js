@@ -1,54 +1,45 @@
 import React, { useState } from 'react';
 import Card from '../../components/UI/Card';
-import { FiSend, FiSearch, FiUser } from 'react-icons/fi';
-import toast from 'react-hot-toast';
+import { FiSend, FiSearch } from 'react-icons/fi';
 
-const Messages = () => {
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'Jane Smith (Parent)', preview: 'Regarding John\'s behavior...', time: '10:30 AM', unread: true },
-    { id: 2, sender: 'Mr. Smith (Teacher)', preview: 'Class schedule update...', time: 'Yesterday', unread: false },
-    { id: 3, sender: 'Ms. Johnson (Teacher)', preview: 'Parent meeting reminder...', time: 'Jan 12', unread: false },
+const Messages = ({ userRole }) => {
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [conversations] = useState([
+    { id: 1, name: 'Mr. Smith', lastMessage: 'About the incident report...', time: '10:30 AM', unread: 2 },
+    { id: 2, name: 'Ms. Johnson', lastMessage: 'Class schedule updated', time: 'Yesterday', unread: 0 },
+    { id: 3, name: 'Parent Group', lastMessage: 'Meeting tomorrow', time: 'Yesterday', unread: 1 },
   ]);
-  
-  const [selectedMessage, setSelectedMessage] = useState(null);
-  const [newMessage, setNewMessage] = useState('');
-
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      toast.success('Message sent successfully');
-      setNewMessage('');
-    }
-  };
 
   return (
     <div className="messages-page">
       <div className="page-header">
         <h1 className="page-title">Messages</h1>
+        <button className="btn btn-primary">New Message</button>
       </div>
 
       <Card className="messages-container">
         <div className="messages-sidebar">
           <div className="messages-search">
             <FiSearch />
-            <input type="text" placeholder="Search messages..." />
+            <input type="text" placeholder="Search conversations..." />
           </div>
-          <div className="messages-list">
-            {messages.map((message) => (
+          <div className="conversations-list">
+            {conversations.map(conv => (
               <div 
-                key={message.id} 
-                className={`message-item ${selectedMessage?.id === message.id ? 'active' : ''} ${message.unread ? 'unread' : ''}`}
-                onClick={() => setSelectedMessage(message)}
+                key={conv.id} 
+                className={`conversation-item ${selectedChat === conv.id ? 'active' : ''}`}
+                onClick={() => setSelectedChat(conv.id)}
               >
-                <div className="message-avatar">
-                  <FiUser />
+                <div className="conversation-avatar">
+                  {conv.name.charAt(0)}
                 </div>
-                <div className="message-info">
-                  <h4>{message.sender}</h4>
-                  <p>{message.preview}</p>
+                <div className="conversation-info">
+                  <h4>{conv.name}</h4>
+                  <p className="conversation-preview">{conv.lastMessage}</p>
                 </div>
-                <div className="message-meta">
-                  <span className="time">{message.time}</span>
-                  {message.unread && <span className="unread-badge"></span>}
+                <div className="conversation-meta">
+                  <span className="time">{conv.time}</span>
+                  {conv.unread > 0 && <span className="unread-badge">{conv.unread}</span>}
                 </div>
               </div>
             ))}
@@ -56,51 +47,24 @@ const Messages = () => {
         </div>
 
         <div className="messages-content">
-          {selectedMessage ? (
+          {selectedChat ? (
             <>
               <div className="message-header">
-                <div className="message-sender">
-                  <div className="avatar"><FiUser /></div>
-                  <div>
-                    <h3>{selectedMessage.sender}</h3>
-                    <p>Active now</p>
-                  </div>
-                </div>
+                <h3>{conversations.find(c => c.id === selectedChat)?.name}</h3>
               </div>
-              
               <div className="message-thread">
-                <div className="message received">
-                  <div className="message-content">
-                    <p>Hello, I wanted to discuss my child's recent behavior in class.</p>
-                    <span className="message-time">10:30 AM</span>
-                  </div>
-                </div>
-                <div className="message sent">
-                  <div className="message-content">
-                    <p>I understand your concern. Let's schedule a meeting to discuss this.</p>
-                    <span className="message-time">10:35 AM</span>
-                  </div>
-                </div>
+                {/* Messages would go here */}
               </div>
-
               <div className="message-input">
-                <textarea 
-                  placeholder="Type your message here..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  rows="3"
-                />
-                <button onClick={handleSendMessage} className="btn btn-primary send-btn">
+                <textarea placeholder="Type your message..." rows="3"></textarea>
+                <button className="btn btn-primary send-btn">
                   <FiSend /> Send
                 </button>
               </div>
             </>
           ) : (
-            <div className="no-message-selected">
-              <div className="empty-state">
-                <h3>Select a conversation</h3>
-                <p>Choose a conversation from the list to start messaging</p>
-              </div>
+            <div className="no-conversation-selected">
+              <h3>Select a conversation to start messaging</h3>
             </div>
           )}
         </div>

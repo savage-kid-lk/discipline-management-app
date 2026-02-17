@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-const ReportForm = ({ onSave, onCancel }) => {
-  const { register, handleSubmit, formState: { errors }, watch } = useForm();
+const ReportForm = ({ onSave, onCancel, userRole }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const [step, setStep] = useState(1);
 
   const onSubmit = (data) => {

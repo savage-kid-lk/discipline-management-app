@@ -1,38 +1,48 @@
 .reports-page {
-  padding: 20px;
+  padding: 1.5rem;
 }
 
-.severity-high {
-  background-color: #fee2e2 !important;
-  color: #991b1b !important;
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
 }
 
-.severity-medium {
-  background-color: #fef3c7 !important;
-  color: #92400e !important;
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid var(--gray-lighter);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.severity-low {
-  background-color: #d1fae5 !important;
-  color: #065f46 !important;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.status-open {
-  background-color: #fef3c7 !important;
-  color: #92400e !important;
+.report-form {
+  max-width: 800px;
 }
 
-.status-in-progress {
-  background-color: #dbeafe !important;
-  color: #1e40af !important;
+/* Status badges */
+.badge.badge-danger {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
 }
 
-.status-resolved {
-  background-color: #d1fae5 !important;
-  color: #065f46 !important;
+.badge.badge-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
 }
 
-.status-closed {
-  background-color: #e5e7eb !important;
-  color: #374151 !important;
+.badge.badge-success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+}
+
+.badge.badge-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
 }

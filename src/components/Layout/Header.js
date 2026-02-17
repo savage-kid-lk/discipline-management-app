@@ -1,8 +1,8 @@
 import React from 'react';
-import { FiBell, FiSearch, FiUser } from 'react-icons/fi';
+import { FiBell, FiSearch } from 'react-icons/fi';
 import '../../Styles/Header.css';
 
-const Header = () => {
+const Header = ({ userRole }) => {
   return (
     <header className="header">
       <div className="header-left">
@@ -18,8 +18,10 @@ const Header = () => {
         </button>
         <div className="user-dropdown">
           <button className="user-btn">
-            <div className="avatar-sm">AD</div>
-            <span>Admin</span>
+            <div className="avatar-sm">
+              {userRole?.charAt(0).toUpperCase() || 'U'}
+            </div>
+            <span>{userRole || 'User'}</span>
           </button>
         </div>
       </div>

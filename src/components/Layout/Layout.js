@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
+// IMPORTANT: These imports must match the file structure exactly!
 import Sidebar from './Sidebar';
 import Header from './Header';
-import '../../Styles/Layout.css';
+import '../../Styles/Layout.css'; 
 
-const Layout = ({ children }) => {
+const Layout = ({ userRole, onLogout }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
@@ -12,9 +13,11 @@ const Layout = ({ children }) => {
       <Sidebar 
         collapsed={sidebarCollapsed} 
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        userRole={userRole}
+        onLogout={onLogout}
       />
       <div className={`main-content ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <Header />
+        <Header userRole={userRole} />
         <div className="content-wrapper">
           <Outlet />
         </div>

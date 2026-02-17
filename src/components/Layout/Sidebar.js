@@ -1,33 +1,26 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  FiHome, 
-  FiUsers, 
-  FiUser, 
-  FiBook, 
-  FiFileText, 
-  FiMessageSquare,
-  FiMail, 
-  FiCreditCard,
-  FiSettings,
-  FiChevronLeft,
-  FiChevronRight
+  FiHome, FiUsers, FiUser, FiBook, FiFileText, 
+  FiMessageSquare, FiMail, FiCreditCard, FiSettings, 
+  FiChevronLeft, FiChevronRight, FiLogOut 
 } from 'react-icons/fi';
-import { AiOutlineDashboard } from 'react-icons/ai';
 import '../../Styles/Sidebar.css';
 
-const Sidebar = ({ collapsed, onToggle }) => {
+const Sidebar = ({ collapsed, onToggle, userRole = 'admin', onLogout }) => {
   const navItems = [
-    { path: '/dashboard', icon: <AiOutlineDashboard />, label: 'Dashboard' },
-    { path: '/students', icon: <FiUsers />, label: 'Students' },
-    { path: '/teachers', icon: <FiUser />, label: 'Teachers' },
-    { path: '/classes', icon: <FiBook />, label: 'Classes' },
-    { path: '/reports', icon: <FiFileText />, label: 'Incident Reports' },
-    { path: '/forum', icon: <FiMessageSquare />, label: 'Forum' },
-    { path: '/messages', icon: <FiMail />, label: 'Messages' },
-    { path: '/payments', icon: <FiCreditCard />, label: 'Payments' },
-    { path: '/settings', icon: <FiSettings />, label: 'Settings' },
+    { path: '/dashboard', icon: <FiHome />, label: 'Dashboard', roles: ['admin', 'teacher', 'principal', 'parent'] },
+    { path: '/students', icon: <FiUsers />, label: 'Students', roles: ['admin'] },
+    { path: '/teachers', icon: <FiUser />, label: 'Teachers', roles: ['admin'] },
+    { path: '/classes', icon: <FiBook />, label: 'Classes', roles: ['admin', 'teacher', 'principal'] },
+    { path: '/reports', icon: <FiFileText />, label: 'Reports', roles: ['admin', 'teacher', 'principal', 'parent'] },
+    { path: '/forum', icon: <FiMessageSquare />, label: 'Forum', roles: ['admin', 'teacher', 'principal', 'parent'] },
+    { path: '/messages', icon: <FiMail />, label: 'Messages', roles: ['admin', 'teacher', 'principal', 'parent'] },
+    { path: '/payments', icon: <FiCreditCard />, label: 'Payments', roles: ['admin'] },
+    { path: '/settings', icon: <FiSettings />, label: 'Settings', roles: ['admin', 'teacher', 'principal', 'parent'] },
   ];
+
+  const filteredNavItems = navItems.filter(item => item.roles.includes(userRole));
 
   return (
     <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -37,8 +30,9 @@ const Sidebar = ({ collapsed, onToggle }) => {
           {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
         </button>
       </div>
+      
       <nav className="sidebar-nav">
-        {navItems.map((item) => (
+        {filteredNavItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -51,13 +45,26 @@ const Sidebar = ({ collapsed, onToggle }) => {
           </NavLink>
         ))}
       </nav>
+      
       <div className="sidebar-footer">
+        {/* Logout Button */}
+        <button onClick={onLogout} className="nav-item" style={{width: '100%', border: 'none', background: 'none', cursor: 'pointer'}}>
+             <FiLogOut />
+             {!collapsed && <span>Logout</span>}
+        </button>
+
         {!collapsed && (
-          <div className="user-info">
-            <div className="avatar">AD</div>
+          <div className="user-info" style={{marginTop: '10px'}}>
+            <div className="avatar">
+              {userRole.charAt(0).toUpperCase()}
+            </div>
             <div>
-              <p className="username">Admin User</p>
-              <p className="user-role">Administrator</p>
+              <p className="username">
+                {userRole === 'admin' ? 'Administrator' :
+                 userRole === 'teacher' ? 'Teacher' :
+                 userRole === 'principal' ? 'Principal' : 'Parent'}
+              </p>
+              <p className="user-role">{userRole.toUpperCase()}</p>
             </div>
           </div>
         )}
