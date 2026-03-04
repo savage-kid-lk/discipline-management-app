@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../../components/UI/Card';
-import { FiPlus, FiDownload, FiFilter, FiEye, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiDownload, FiFilter, FiEye, FiEdit, FiTrash2, FiSearch, FiX, FiChevronDown, FiUserCheck, FiUserX, FiAlertCircle } from 'react-icons/fi';
 import Modal from '../../components/UI/Modal';
 import { getStudents, addStudent, updateStudent, deleteStudent } from '../../firebase';
 import toast from 'react-hot-toast';
@@ -8,9 +8,17 @@ import '../../Styles/Students.css';
 
 const Students = ({ userRole }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    grade: '',
+    status: '',
+    incidents: ''
+  });
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -21,22 +29,59 @@ const Students = ({ userRole }) => {
     parentPhone: '',
     dateOfBirth: '',
     address: '',
-    status: 'Active'
+    status: 'Active',
+    incidents: 0
   });
 
   useEffect(() => {
     fetchStudents();
   }, []);
 
+  useEffect(() => {
+    filterStudents();
+  }, [searchTerm, filters, students]);
+
   const fetchStudents = async () => {
     setLoading(true);
     const result = await getStudents();
     if (result.success) {
       setStudents(result.data);
+      setFilteredStudents(result.data);
     } else {
       toast.error('Failed to load students');
     }
     setLoading(false);
+  };
+
+  const filterStudents = () => {
+    let filtered = [...students];
+
+    // Apply search
+    if (searchTerm) {
+      filtered = filtered.filter(student => 
+        student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.parentName?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply grade filter
+    if (filters.grade) {
+      filtered = filtered.filter(student => student.grade === filters.grade);
+    }
+
+    // Apply status filter
+    if (filters.status) {
+      filtered = filtered.filter(student => student.status === filters.status);
+    }
+
+    // Apply incidents filter
+    if (filters.incidents) {
+      const incidentCount = parseInt(filters.incidents);
+      filtered = filtered.filter(student => (student.incidents || 0) >= incidentCount);
+    }
+
+    setFilteredStudents(filtered);
   };
 
   const handleInputChange = (e) => {
@@ -62,7 +107,8 @@ const Students = ({ userRole }) => {
       parentPhone: '',
       dateOfBirth: '',
       address: '',
-      status: 'Active'
+      status: 'Active',
+      incidents: 0
     });
     setIsModalOpen(true);
   };
@@ -83,7 +129,8 @@ const Students = ({ userRole }) => {
       parentPhone: student.parentPhone || '',
       dateOfBirth: student.dateOfBirth || '',
       address: student.address || '',
-      status: student.status || 'Active'
+      status: student.status || 'Active',
+      incidents: student.incidents || 0
     });
     setIsModalOpen(true);
   };
@@ -130,6 +177,55 @@ const Students = ({ userRole }) => {
     }
   };
 
+  const handleExport = () => {
+    const csvContent = [
+      ['Student ID', 'Name', 'Grade', 'Parent', 'Parent Email', 'Status', 'Incidents'].join(','),
+      ...filteredStudents.map(s => [
+        s.studentId,
+        s.name,
+        s.grade,
+        s.parentName,
+        s.parentEmail,
+        s.status,
+        s.incidents || 0
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `students_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    toast.success('Students exported successfully');
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      grade: '',
+      status: '',
+      incidents: ''
+    });
+    setSearchTerm('');
+    setIsFilterModalOpen(false);
+  };
+
+  const getStatusBadgeClass = (status) => {
+    switch(status) {
+      case 'Active': return 'badge-success';
+      case 'Inactive': return 'badge-secondary';
+      case 'Suspended': return 'badge-danger';
+      case 'Warning': return 'badge-warning';
+      default: return 'badge-info';
+    }
+  };
+
+  const getIncidentBadgeClass = (incidents) => {
+    if (incidents >= 5) return 'badge-danger';
+    if (incidents >= 3) return 'badge-warning';
+    return 'badge-success';
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -141,10 +237,34 @@ const Students = ({ userRole }) => {
   return (
     <div className="students-page">
       <div className="page-header">
-        <h1 className="page-title">Student Management</h1>
+        <div>
+          <h1 className="page-title">Student Management</h1>
+          <p className="page-subtitle">Manage and monitor student records</p>
+        </div>
         <div className="page-actions">
-          <button className="btn btn-outline"><FiFilter /> Filter</button>
-          <button className="btn btn-outline"><FiDownload /> Export</button>
+          <div className="search-box">
+            <FiSearch className="search-icon" />
+            <input 
+              type="text" 
+              placeholder="Search students..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button className="clear-search" onClick={() => setSearchTerm('')}>
+                <FiX />
+              </button>
+            )}
+          </div>
+          <button className="btn btn-outline" onClick={() => setIsFilterModalOpen(true)}>
+            <FiFilter /> Filter
+            {(filters.grade || filters.status || filters.incidents) && (
+              <span className="filter-badge">•</span>
+            )}
+          </button>
+          <button className="btn btn-outline" onClick={handleExport}>
+            <FiDownload /> Export
+          </button>
           {userRole === 'admin' && (
             <button className="btn btn-primary" onClick={handleAddStudent}>
               <FiPlus /> Add Student
@@ -153,15 +273,71 @@ const Students = ({ userRole }) => {
         </div>
       </div>
 
-      <Card>
+      {/* Stats Cards */}
+      <div className="stats-grid">
+        <div className="stat-card-small">
+          <div className="stat-icon blue">
+            <FiUserCheck />
+          </div>
+          <div className="stat-content">
+            <h3>{students.filter(s => s.status === 'Active').length}</h3>
+            <p>Active Students</p>
+          </div>
+        </div>
+        <div className="stat-card-small">
+          <div className="stat-icon orange">
+            <FiAlertCircle />
+          </div>
+          <div className="stat-content">
+            <h3>{students.filter(s => s.status === 'Warning').length}</h3>
+            <p>On Warning</p>
+          </div>
+        </div>
+        <div className="stat-card-small">
+          <div className="stat-icon red">
+            <FiUserX />
+          </div>
+          <div className="stat-content">
+            <h3>{students.filter(s => s.status === 'Suspended').length}</h3>
+            <p>Suspended</p>
+          </div>
+        </div>
+        <div className="stat-card-small">
+          <div className="stat-icon green">
+            <FiUserCheck />
+          </div>
+          <div className="stat-content">
+            <h3>{students.reduce((acc, s) => acc + (s.incidents || 0), 0)}</h3>
+            <p>Total Incidents</p>
+          </div>
+        </div>
+      </div>
+
+      <Card className="students-table-card">
+        <div className="table-header">
+          <div className="table-title">
+            <h3>Student Records</h3>
+            <span className="record-count">{filteredStudents.length} students</span>
+          </div>
+          <div className="table-actions">
+            <select className="table-select" onChange={(e) => console.log('Sort by:', e.target.value)}>
+              <option value="">Sort by</option>
+              <option value="name">Name</option>
+              <option value="grade">Grade</option>
+              <option value="status">Status</option>
+              <option value="incidents">Incidents</option>
+            </select>
+          </div>
+        </div>
+
         <div className="table-responsive">
-          <table>
+          <table className="students-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Student ID</th>
                 <th>Name</th>
                 <th>Grade</th>
-                <th>Parent</th>
+                <th>Parent/Guardian</th>
                 <th>Parent Email</th>
                 <th>Incidents</th>
                 <th>Status</th>
@@ -169,47 +345,126 @@ const Students = ({ userRole }) => {
               </tr>
             </thead>
             <tbody>
-              {students.map(student => (
-                <tr key={student.id}>
-                  <td>{student.studentId}</td>
-                  <td>{student.name}</td>
-                  <td>{student.grade}</td>
-                  <td>{student.parentName}</td>
-                  <td>{student.parentEmail}</td>
-                  <td>
-                    <span className={`badge ${student.incidents > 2 ? 'badge-danger' : 'badge-warning'}`}>
-                      {student.incidents || 0}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`badge ${student.status === 'Active' ? 'badge-success' : 'badge-danger'}`}>
-                      {student.status}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button className="btn-icon" onClick={() => toast.info('View student details')}>
-                        <FiEye />
-                      </button>
-                      {userRole === 'admin' && (
-                        <>
-                          <button className="btn-icon" onClick={() => handleEditStudent(student)}>
-                            <FiEdit />
-                          </button>
-                          <button className="btn-icon danger" onClick={() => handleDeleteStudent(student.id)}>
-                            <FiTrash2 />
-                          </button>
-                        </>
-                      )}
+              {filteredStudents.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="no-data">
+                    <div className="no-data-content">
+                      <FiUserX size={48} />
+                      <h3>No students found</h3>
+                      <p>Try adjusting your filters or add a new student</p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredStudents.map(student => (
+                  <tr key={student.id}>
+                    <td><span className="student-id">{student.studentId}</span></td>
+                    <td>
+                      <div className="student-name-cell">
+                        <div className="student-avatar">
+                          {student.name?.charAt(0) || '?'}
+                        </div>
+                        {student.name}
+                      </div>
+                    </td>
+                    <td><span className="grade-badge">Grade {student.grade}</span></td>
+                    <td>{student.parentName}</td>
+                    <td><a href={`mailto:${student.parentEmail}`} className="email-link">{student.parentEmail}</a></td>
+                    <td>
+                      <span className={`badge ${getIncidentBadgeClass(student.incidents || 0)}`}>
+                        {student.incidents || 0} incidents
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge ${getStatusBadgeClass(student.status)}`}>
+                        {student.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button className="btn-icon" onClick={() => toast.info('View student details')} title="View">
+                          <FiEye />
+                        </button>
+                        {userRole === 'admin' && (
+                          <>
+                            <button className="btn-icon" onClick={() => handleEditStudent(student)} title="Edit">
+                              <FiEdit />
+                            </button>
+                            <button className="btn-icon danger" onClick={() => handleDeleteStudent(student.id)} title="Delete">
+                              <FiTrash2 />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </Card>
 
+      {/* Filter Modal */}
+      <Modal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        title="Filter Students"
+        size="md"
+      >
+        <div className="filter-form">
+          <div className="form-group">
+            <label>Grade</label>
+            <select 
+              value={filters.grade}
+              onChange={(e) => setFilters({...filters, grade: e.target.value})}
+            >
+              <option value="">All Grades</option>
+              {[9,10,11,12].map(g => (
+                <option key={g} value={g}>Grade {g}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Status</label>
+            <select 
+              value={filters.status}
+              onChange={(e) => setFilters({...filters, status: e.target.value})}
+            >
+              <option value="">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Warning">Warning</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Minimum Incidents</label>
+            <select 
+              value={filters.incidents}
+              onChange={(e) => setFilters({...filters, incidents: e.target.value})}
+            >
+              <option value="">Any</option>
+              <option value="1">1+ incidents</option>
+              <option value="3">3+ incidents</option>
+              <option value="5">5+ incidents</option>
+            </select>
+          </div>
+
+          <div className="filter-actions">
+            <button className="btn btn-outline" onClick={clearFilters}>
+              Clear Filters
+            </button>
+            <button className="btn btn-primary" onClick={() => setIsFilterModalOpen(false)}>
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Student Form Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -330,18 +585,30 @@ const Students = ({ userRole }) => {
             />
           </div>
 
-          <div className="form-group">
-            <label>Status</label>
-            <select 
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="Suspended">Suspended</option>
-              <option value="Warning">Warning</option>
-            </select>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Status</label>
+              <select 
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Suspended">Suspended</option>
+                <option value="Warning">Warning</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Incident Count</label>
+              <input 
+                type="number"
+                name="incidents"
+                value={formData.incidents}
+                onChange={handleInputChange}
+                min="0"
+              />
+            </div>
           </div>
 
           <div className="form-actions">

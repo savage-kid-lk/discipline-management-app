@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiBell, FiSearch, FiClock, FiAlertTriangle, FiMessageCircle, FiUser, FiCheck } from 'react-icons/fi';
+import { FiBell, FiSearch, FiClock, FiAlertTriangle, FiMessageCircle, FiUser, FiCheck, FiSettings } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import '../../Styles/Header.css';
 
 const Header = ({ userRole, notifications = [], onMarkAsRead, onViewAll }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef(null);
   const [unreadCount, setUnreadCount] = useState(notifications.filter(n => !n.read).length);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setUnreadCount(notifications.filter(n => !n.read).length);
@@ -40,6 +42,10 @@ const Header = ({ userRole, notifications = [], onMarkAsRead, onViewAll }) => {
     if (diffMinutes < 60) return `${diffMinutes} min ago`;
     if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)} hours ago`;
     return `${Math.floor(diffMinutes / 1440)} days ago`;
+  };
+
+  const handleProfileClick = () => {
+    navigate('/settings');
   };
 
   return (
@@ -107,7 +113,7 @@ const Header = ({ userRole, notifications = [], onMarkAsRead, onViewAll }) => {
         </div>
         
         <div className="user-dropdown">
-          <button className="user-btn">
+          <button className="user-btn" onClick={handleProfileClick}>
             <div className="avatar-sm">
               {userRole?.charAt(0).toUpperCase() || 'U'}
             </div>

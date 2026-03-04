@@ -1,24 +1,28 @@
 @import './variables.css';
 
-.classes-page {
+.teachers-page {
   padding: 1.5rem;
 }
 
-.classes-grid {
+.teachers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
   margin-top: 1rem;
 }
 
-.class-card {
+.teacher-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
   border: 1px solid var(--gray-lighter);
   position: relative;
   overflow: hidden;
 }
 
-.class-card::before {
+.teacher-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -30,56 +34,62 @@
   transition: transform 0.3s ease;
 }
 
-.class-card:hover::before {
+.teacher-card:hover::before {
   transform: translateX(0);
 }
 
-.class-card:hover {
+.teacher-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
 
-.class-card-header {
+.teacher-card-header {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  position: relative;
 }
 
-.class-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+.teacher-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--white);
+  font-weight: 600;
   font-size: 1.5rem;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
 }
 
-.class-title {
+.teacher-info {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
-.class-title h3 {
-  font-size: 1.1rem;
+.teacher-info h3 {
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--dark);
+  margin: 0 0 0.25rem 0;
+}
+
+.teacher-info p {
+  color: var(--gray);
+  font-size: 0.9rem;
   margin: 0;
 }
 
-.class-details {
+.teacher-details {
   margin-bottom: 1.5rem;
   padding: 1rem 0;
   border-top: 1px solid var(--gray-lighter);
   border-bottom: 1px solid var(--gray-lighter);
 }
 
-.class-details .detail-item {
+.detail-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -88,31 +98,50 @@
   font-size: 0.95rem;
 }
 
-.class-details .detail-item svg {
+.detail-item svg {
   color: var(--primary);
   font-size: 1rem;
-  width: 20px;
 }
 
-.class-actions {
+.detail-item a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.detail-item a:hover {
+  text-decoration: underline;
+}
+
+.teacher-stats {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
 }
 
-.btn-sm {
-  padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
+.stat {
+  text-align: center;
+  flex: 1;
 }
 
-.btn-outline.danger {
-  border-color: var(--danger);
-  color: var(--danger);
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark);
+  line-height: 1.2;
 }
 
-.btn-outline.danger:hover {
-  background: var(--danger);
-  color: var(--white);
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+.teacher-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  border-top: 1px solid var(--gray-lighter);
+  padding-top: 1rem;
 }
 
 .full-width {
@@ -120,25 +149,20 @@
 }
 
 @media (max-width: 768px) {
-  .classes-grid {
+  .teachers-grid {
     grid-template-columns: 1fr;
   }
 
-  .class-card-header {
+  .teacher-card-header {
     flex-direction: column;
     text-align: center;
   }
 
-  .class-title {
-    flex-direction: column;
-    gap: 0.5rem;
+  .teacher-info {
+    text-align: center;
   }
 
-  .class-actions {
-    flex-direction: column;
-  }
-
-  .class-actions .btn {
-    width: 100%;
+  .teacher-actions {
+    justify-content: center;
   }
 }

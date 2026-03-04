@@ -1,48 +1,84 @@
+@import './variables.css';
+
 .reports-page {
   padding: 1.5rem;
 }
 
-.loading-container {
+.reports-table-card {
+  overflow: hidden;
+}
+
+.reports-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.reports-table th {
+  text-align: left;
+  padding: 1rem;
+  background: var(--light);
+  color: var(--gray-dark);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 2px solid var(--gray-lighter);
+}
+
+.reports-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-lighter);
+  color: var(--dark);
+}
+
+.reports-table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.reports-table tbody tr:hover {
+  background: var(--light);
+  transform: scale(1.01);
+  box-shadow: var(--shadow-sm);
+}
+
+.incident-type {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.date-cell {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 400px;
+  gap: 0.5rem;
+  color: var(--gray-dark);
 }
 
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 3px solid var(--gray-lighter);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.date-cell svg {
+  color: var(--primary);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.status-icon {
+  margin-right: 0.25rem;
+  display: inline-flex;
+  align-items: center;
 }
 
-.report-form {
-  max-width: 800px;
-}
+@media (max-width: 768px) {
+  .reports-table {
+    font-size: 0.85rem;
+  }
 
-/* Status badges */
-.badge.badge-danger {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  color: #991b1b;
-}
+  .reports-table th,
+  .reports-table td {
+    padding: 0.75rem 0.5rem;
+  }
 
-.badge.badge-warning {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
-}
-
-.badge.badge-success {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #065f46;
-}
-
-.badge.badge-info {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  color: #1e40af;
+  .date-cell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
 }
