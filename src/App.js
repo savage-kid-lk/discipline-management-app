@@ -12,6 +12,7 @@ import Forum from './pages/Forum/Forum';
 import Messages from './pages/Messages/Messages';
 import Payments from './pages/Payments/Payments';
 import Settings from './pages/Settings/Settings';
+import Notifications from './pages/Notifications/Notifications';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import './Styles/theme.css';
@@ -21,14 +22,42 @@ function App() {
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: 'incident',
+      title: 'New Incident Reported',
+      message: 'Classroom disruption in Math class - Mr. Smith',
+      time: '2 hours ago',
+      read: false,
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000)
+    },
+    {
+      id: 2,
+      type: 'message',
+      title: 'New Message',
+      message: 'Parent meeting request from Mrs. Davis',
+      time: '5 hours ago',
+      read: false,
+      timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000)
+    },
+    {
+      id: 3,
+      type: 'reminder',
+      title: 'Weekly Report Due',
+      message: 'Submit weekly incident reports by Friday',
+      time: '1 day ago',
+      read: true,
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000)
+    }
+  ]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
         setIsAuthenticated(true);
-        // You can fetch user role from Firestore here
-        setUserRole('admin'); // Default for now
+        setUserRole('admin');
       } else {
         setUser(null);
         setIsAuthenticated(false);
@@ -53,6 +82,16 @@ function App() {
     } catch (error) {
       console.error('Logout error:', error);
     }
+  };
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  };
+
+  const handleMarkAsRead = (id) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, read: true } : n
+    ));
   };
 
   const ProtectedRoute = ({ children }) => {
@@ -115,12 +154,25 @@ function App() {
           path="/" 
           element={
             <ProtectedRoute>
-              <Layout userRole={userRole} onLogout={handleLogout} user={user} />
+              <Layout 
+                userRole={userRole} 
+                onLogout={handleLogout} 
+                user={user}
+                notifications={notifications}
+                onMarkAllAsRead={handleMarkAllAsRead}
+              />
             </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="/dashboard" />} />
-          <Route path="dashboard" element={<Dashboard userRole={userRole} user={user} />} />
+          <Route path="dashboard" element={
+            <Dashboard 
+              userRole={userRole} 
+              user={user}
+              notifications={notifications}
+              onMarkAsRead={handleMarkAllAsRead}
+            />
+          } />
           <Route path="students" element={<Students userRole={userRole} />} />
           <Route path="teachers" element={<Teachers userRole={userRole} />} />
           <Route path="classes" element={<Classes userRole={userRole} />} />
@@ -129,6 +181,13 @@ function App() {
           <Route path="messages" element={<Messages userRole={userRole} />} />
           <Route path="payments" element={<Payments userRole={userRole} />} />
           <Route path="settings" element={<Settings userRole={userRole} />} />
+          <Route path="notifications" element={
+            <Notifications 
+              notifications={notifications}
+              onMarkAsRead={handleMarkAsRead}
+              onMarkAllAsRead={handleMarkAllAsRead}
+            />
+          } />
         </Route>
         
         <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />

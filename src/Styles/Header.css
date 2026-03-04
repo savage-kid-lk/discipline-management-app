@@ -11,11 +11,12 @@
   position: sticky;
   top: 0;
   z-index: 90;
+  box-shadow: var(--shadow-sm);
 }
 
 .header-left {
   flex: 1;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 .search-bar {
@@ -30,15 +31,16 @@
   transform: translateY(-50%);
   color: var(--gray);
   font-size: 1.1rem;
+  transition: color 0.3s ease;
 }
 
 .search-bar input {
   width: 100%;
-  padding: 0.6rem 1rem 0.6rem 2.75rem;
+  padding: 0.7rem 1rem 0.7rem 2.75rem;
   border: 1px solid var(--gray-lighter);
   border-radius: 2rem;
   font-size: 0.95rem;
-  transition: var(--transition);
+  transition: all 0.3s ease;
   background: var(--light);
 }
 
@@ -49,42 +51,248 @@
   background: var(--white);
 }
 
+.search-bar input:focus + .search-icon {
+  color: var(--primary);
+}
+
 .header-right {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.icon-btn {
+.notification-container {
+  position: relative;
+}
+
+.notification-btn {
+  position: relative;
   background: none;
   border: none;
   color: var(--gray-dark);
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0.5rem;
-  position: relative;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition);
+  transition: all 0.3s ease;
 }
 
-.icon-btn:hover {
+.notification-btn:hover {
   background: var(--gray-lighter);
+  color: var(--primary);
+  transform: scale(1.1);
+}
+
+.notification-btn.active {
+  background: var(--primary-light);
   color: var(--primary);
 }
 
 .notification-badge {
   position: absolute;
-  top: 0;
-  right: 0;
-  background: var(--danger);
+  top: 2px;
+  right: 2px;
+  background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
   color: var(--white);
   font-size: 0.7rem;
   padding: 0.15rem 0.4rem;
   border-radius: 1rem;
   min-width: 18px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 380px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  z-index: 1000;
+  animation: slideDown 0.3s ease;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--primary-light) 0%, transparent 100%);
+}
+
+.notification-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0;
+}
+
+.mark-all-read {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
+
+.mark-all-read:hover {
+  background: var(--primary-light);
+}
+
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+  background: var(--gray-lighter);
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+  background: var(--gray);
+  border-radius: 4px;
+}
+
+.notification-item {
+  display: flex;
+  padding: 1rem 1.5rem;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--gray-lighter);
+}
+
+.notification-item:hover {
+  background: var(--light);
+}
+
+.notification-item.unread {
+  background: linear-gradient(90deg, var(--primary-light) 0%, transparent 100%);
+  border-left: 3px solid var(--primary);
+}
+
+.notification-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.notification-item.unread .notification-icon {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.notification-icon:has(svg[data-icon="alert-triangle"]) {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.notification-icon:has(svg[data-icon="message-circle"]) {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--info);
+}
+
+.notification-icon:has(svg[data-icon="clock"]) {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.notification-message {
+  color: var(--gray);
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: var(--gray-light);
+}
+
+.notification-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--gray);
+}
+
+.notification-empty svg {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.notification-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--gray-lighter);
+  text-align: center;
+}
+
+.view-all-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-all-btn:hover {
+  text-decoration: underline;
 }
 
 .user-btn {
@@ -96,17 +304,32 @@
   cursor: pointer;
   padding: 0.5rem;
   border-radius: var(--border-radius);
-  transition: var(--transition);
+  transition: all 0.3s ease;
 }
 
 .user-btn:hover {
   background: var(--gray-lighter);
+  transform: translateY(-2px);
 }
 
-.user-btn span {
+.user-name {
   font-weight: 500;
   color: var(--dark);
   font-size: 0.95rem;
+}
+
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--white);
+  box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3);
 }
 
 @media (max-width: 768px) {
@@ -115,14 +338,23 @@
   }
   
   .header-left {
-    max-width: none;
+    max-width: 200px;
   }
   
-  .user-btn span {
+  .user-name {
     display: none;
   }
   
+  .notification-dropdown {
+    width: 320px;
+    right: -50px;
+  }
+  
   .search-bar {
-    width: 200px;
+    width: 100%;
+  }
+  
+  .search-bar input {
+    font-size: 0.85rem;
   }
 }

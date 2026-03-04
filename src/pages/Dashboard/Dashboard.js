@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../../components/UI/Card';
 import DashboardChart from '../../components/Charts/DashboardChart';
+import ScheduleModal from '../../components/Modals/ScheduleModal';
+
 import { 
   FiUsers, FiUser, FiBook, FiAlertTriangle, 
   FiMessageCircle, FiFileText, FiTrendingUp, 
-  FiClock, FiCalendar, FiAward, FiBell 
+  FiClock, FiCalendar, FiAward, FiBell, FiX
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, getDocs } from 'firebase/firestore';
@@ -14,12 +16,44 @@ import '../../Styles/Dashboard.css';
 
 const Dashboard = ({ userRole = 'admin', user }) => {
   const navigate = useNavigate();
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [stats, setStats] = useState({
-    students: { value: 0, change: '+0%', icon: <FiUsers />, color: 'primary' },
-    teachers: { value: 0, change: '+0%', icon: <FiUser />, color: 'info' },
-    classes: { value: 0, change: '+0%', icon: <FiBook />, color: 'success' },
-    incidents: { value: 0, change: '0%', icon: <FiAlertTriangle />, color: 'danger' }
+    students: { value: 0, change: '+12%', icon: <FiUsers />, color: 'primary' },
+    teachers: { value: 0, change: '+4%', icon: <FiUser />, color: 'info' },
+    classes: { value: 0, change: '+2%', icon: <FiBook />, color: 'success' },
+    incidents: { value: 0, change: '-15%', icon: <FiAlertTriangle />, color: 'danger' }
   });
+  
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: 'incident',
+      title: 'New Incident Reported',
+      message: 'Classroom disruption in Math class - Mr. Smith',
+      time: '2 hours ago',
+      read: false,
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000)
+    },
+    {
+      id: 2,
+      type: 'message',
+      title: 'New Message',
+      message: 'Parent meeting request from Mrs. Davis',
+      time: '5 hours ago',
+      read: false,
+      timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000)
+    },
+    {
+      id: 3,
+      type: 'reminder',
+      title: 'Weekly Report Due',
+      message: 'Submit weekly incident reports by Friday',
+      time: '1 day ago',
+      read: true,
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000)
+    }
+  ]);
   
   const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +64,6 @@ const Dashboard = ({ userRole = 'admin', user }) => {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch real data from Firestore
       const studentsSnap = await getDocs(collection(db, 'students'));
       const teachersSnap = await getDocs(collection(db, 'teachers'));
       const classesSnap = await getDocs(collection(db, 'classes'));
@@ -63,7 +96,6 @@ const Dashboard = ({ userRole = 'admin', user }) => {
         }
       });
 
-      // Mock recent activities (replace with real data)
       setRecentActivities([
         { id: 1, type: 'incident', title: 'New incident reported', description: 'Classroom disruption in Math class', time: '2 hours ago', user: 'Mr. Smith' },
         { id: 2, type: 'forum', title: 'New forum discussion', description: 'Teaching Strategies for 2024', time: '5 hours ago', user: 'Dr. Johnson' },
@@ -77,6 +109,24 @@ const Dashboard = ({ userRole = 'admin', user }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMarkAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
+    toast.success('All notifications marked as read');
+  };
+
+  const handleViewAllNotifications = () => {
+    setShowNotifications(false);
+    navigate('/notifications');
+  };
+
+  const handleViewSchedule = () => {
+    setShowSchedule(true);
+  };
+
+  const handleCloseSchedule = () => {
+    setShowSchedule(false);
   };
 
   const getGreeting = () => {
@@ -110,14 +160,58 @@ const Dashboard = ({ userRole = 'admin', user }) => {
           <p>Here's what's happening with your school today.</p>
         </div>
         <div className="welcome-actions">
-          <button className="btn btn-outline">
+          <button className="btn btn-outline" onClick={handleViewSchedule}>
             <FiCalendar /> View Schedule
           </button>
-          <button className="btn btn-primary">
+          <button 
+            className="btn btn-primary notification-dashboard-btn"
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
             <FiBell /> Notifications
+            {notifications.filter(n => !n.read).length > 0 && (
+              <span className="notification-badge-dashboard">
+                {notifications.filter(n => !n.read).length}
+              </span>
+            )}
           </button>
         </div>
       </div>
+      
+      {/* Quick Notifications Panel */}
+      {showNotifications && (
+        <div className="quick-notifications-panel">
+          <div className="quick-notifications-header">
+            <h3>Recent Notifications</h3>
+            <button className="close-btn" onClick={() => setShowNotifications(false)}>
+              <FiX />
+            </button>
+          </div>
+          <div className="quick-notifications-list">
+            {notifications.slice(0, 3).map((notif) => (
+              <div key={notif.id} className={`quick-notification-item ${!notif.read ? 'unread' : ''}`}>
+                <div className="quick-notification-icon">
+                  {notif.type === 'incident' && <FiAlertTriangle />}
+                  {notif.type === 'message' && <FiMessageCircle />}
+                  {notif.type === 'reminder' && <FiClock />}
+                </div>
+                <div className="quick-notification-content">
+                  <p className="quick-notification-title">{notif.title}</p>
+                  <p className="quick-notification-message">{notif.message}</p>
+                  <span className="quick-notification-time">{notif.time}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="quick-notifications-footer">
+            <button className="view-all-link" onClick={handleViewAllNotifications}>
+              View all notifications
+            </button>
+            <button className="mark-read-link" onClick={handleMarkAsRead}>
+              Mark all as read
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Stats Grid */}
       <div className="stats-grid">
@@ -189,6 +283,9 @@ const Dashboard = ({ userRole = 'admin', user }) => {
           ))}
         </div>
       </Card>
+
+      {/* Schedule Modal */}
+      <ScheduleModal isOpen={showSchedule} onClose={handleCloseSchedule} userRole={userRole} />
     </div>
   );
 };

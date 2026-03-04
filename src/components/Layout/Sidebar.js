@@ -3,7 +3,8 @@ import { NavLink } from 'react-router-dom';
 import { 
   FiHome, FiUsers, FiUser, FiBook, FiFileText, 
   FiMessageSquare, FiMail, FiCreditCard, FiSettings, 
-  FiChevronLeft, FiChevronRight, FiLogOut 
+  FiChevronLeft, FiChevronRight, FiLogOut,
+  FiBarChart2, FiCalendar, FiBell, FiHelpCircle
 } from 'react-icons/fi';
 import '../../Styles/Sidebar.css';
 
@@ -25,46 +26,55 @@ const Sidebar = ({ collapsed, onToggle, userRole = 'admin', onLogout }) => {
   return (
     <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        {!collapsed && <h2>EduManage</h2>}
+        {!collapsed && (
+          <div className="logo-container">
+            <div className="logo-icon">📚</div>
+            <h2>EduManage</h2>
+          </div>
+        )}
         <button className="toggle-btn" onClick={onToggle}>
           {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
         </button>
       </div>
       
-      <nav className="sidebar-nav">
-        {filteredNavItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => 
-              `nav-item ${isActive ? 'active' : ''}`
-            }
-          >
-            {item.icon}
-            {!collapsed && <span>{item.label}</span>}
-          </NavLink>
-        ))}
-      </nav>
+      <div className="sidebar-nav-container">
+        <nav className="sidebar-nav">
+          {filteredNavItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => 
+                `nav-item ${isActive ? 'active' : ''}`
+              }
+            >
+              <span className="nav-icon">{item.icon}</span>
+              {!collapsed && <span className="nav-label">{item.label}</span>}
+              {!collapsed && <span className="nav-indicator"></span>}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
       
       <div className="sidebar-footer">
-        {/* Logout Button */}
-        <button onClick={onLogout} className="nav-item" style={{width: '100%', border: 'none', background: 'none', cursor: 'pointer'}}>
-             <FiLogOut />
-             {!collapsed && <span>Logout</span>}
-        </button>
+        <div className="sidebar-footer-top">
+          <button onClick={onLogout} className="nav-item logout-btn">
+            <span className="nav-icon"><FiLogOut /></span>
+            {!collapsed && <span className="nav-label">Logout</span>}
+          </button>
+        </div>
 
         {!collapsed && (
-          <div className="user-info" style={{marginTop: '10px'}}>
-            <div className="avatar">
+          <div className="user-profile">
+            <div className="user-avatar">
               {userRole.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <p className="username">
+            <div className="user-details">
+              <p className="user-name">
                 {userRole === 'admin' ? 'Administrator' :
                  userRole === 'teacher' ? 'Teacher' :
                  userRole === 'principal' ? 'Principal' : 'Parent'}
               </p>
-              <p className="user-role">{userRole.toUpperCase()}</p>
+              <p className="user-role-badge">{userRole.toUpperCase()}</p>
             </div>
           </div>
         )}
